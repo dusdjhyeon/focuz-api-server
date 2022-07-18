@@ -3,6 +3,7 @@ package dcom.focuz.api.domain.group;
 import dcom.focuz.api.domain.user.User;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
@@ -17,6 +18,11 @@ import java.time.LocalDateTime;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class UserGroup {
+
+    public enum Permission {
+        OWNER, MANAGER, MEMBER, NONMEMBER
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -32,4 +38,10 @@ public class UserGroup {
 
     @CreatedDate
     private LocalDateTime joined;
+
+    @LastModifiedDate
+    private LocalDateTime modified;
+
+    @Column
+    private Permission permission;
 }
