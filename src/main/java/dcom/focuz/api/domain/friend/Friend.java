@@ -1,11 +1,10 @@
-package dcom.focuz.api.domain.group;
+package dcom.focuz.api.domain.friend;
 
+import dcom.focuz.api.domain.user.User;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 @Builder
 @Getter
@@ -15,19 +14,20 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "study_group")
-public class Group {
+public class Friend {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
     private Integer id;
 
-    @Column
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column
-    private String description;
+    @ManyToOne
+    @JoinColumn(name = "target_user_id", nullable = false)
+    private User targetUser;
 
-    @OneToMany(mappedBy = "group")
-    private Set<UserGroup> users = new HashSet<>();
+    @Column(nullable = false)
+    private FriendState state;
 }

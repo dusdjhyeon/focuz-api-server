@@ -29,7 +29,14 @@ public class UserController {
     @ApiOperation("해당 아이디를 가진 유저의 정보를 반환 합니다.")
     @GetMapping(value = "/{userId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<UserResponseDto.Simple> getUserById(@ApiParam(value="유저 ID", required = true) @PathVariable final String userId) {
-        return null;
+    public ResponseEntity<UserResponseDto.Profile> getUserById(@ApiParam(value="유저 ID", required = true) @PathVariable final Integer userId) {
+        return ResponseEntity.ok(userService.findUserById(userId));
+    }
+
+    @ApiOperation("현재 유저의 전체 정보를 반환 합니다.")
+    @GetMapping(value = "/my_profile/info")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<UserResponseDto.Profile> getMyProfile() {
+        return ResponseEntity.ok(userService.getMyProfile());
     }
 }

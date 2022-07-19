@@ -29,7 +29,7 @@ public class User implements UserDetails {
     @Column
     private Integer id;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(length = 64, nullable = false)
@@ -45,10 +45,11 @@ public class User implements UserDetails {
     private String profileImage;
 
     @CreatedDate
-    @Column(updatable = false)
+    @Column(updatable = false, name = "created_date")
     private LocalDateTime createdDate;
 
     @LastModifiedDate
+    @Column(name = "modified_date")
     private LocalDateTime modifiedDate;
 
     @Column
@@ -64,12 +65,12 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return "";
     }
 
     @Override
     public String getUsername() {
-        return this.email;
+        return String.valueOf(this.id);
     }
 
     @Override

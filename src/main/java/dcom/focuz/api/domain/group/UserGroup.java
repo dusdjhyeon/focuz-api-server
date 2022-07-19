@@ -19,10 +19,6 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public class UserGroup {
 
-    public enum Permission {
-        OWNER, MANAGER, MEMBER, NONMEMBER
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
@@ -43,5 +39,5 @@ public class UserGroup {
     private LocalDateTime modified;
 
     @Column
-    private Permission permission;
+    private UserGroupPermission permission;
 }
