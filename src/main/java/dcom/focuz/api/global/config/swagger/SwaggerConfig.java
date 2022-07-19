@@ -17,9 +17,9 @@ import java.util.List;
 @Configuration
 @EnableSwagger2
 public class SwaggerConfig {
-    private static final String API_NAME = "D.Com API";
+    private static final String API_NAME = "Focuz API";
     private static final String API_VERSION = "0.0.1";
-    private static final String API_DESCRIPTION = "D.Com 대외 홍보용 홈페이지 명세서";
+    private static final String API_DESCRIPTION = "Focuz API 명세서";
 
     @Bean
     public Docket api() {
@@ -39,7 +39,7 @@ public class SwaggerConfig {
                 .title(API_NAME)
                 .version(API_VERSION)
                 .description(API_DESCRIPTION)
-                .contact(new Contact("Justkode", "https://justkode.kr", "sobu0715@gmail.com"))
+                .contact(new Contact("D.Com", "http://dcom.club", "sobu0715@gmail.com"))
                 .build();
     }
 

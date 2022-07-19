@@ -23,15 +23,21 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
 
+        // Oauth Service ID (Google, Kakao, Naver)
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+
+        // Oauth 각 서비스 당 PK
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
-        log.info("registrationId = {}", registrationId);
-        log.info("userNameAttributeName = {}", userNameAttributeName);
+        log.info(registrationId);
+        log.info(userNameAttributeName);
 
         OAuth2Attribute oAuth2Attribute = OAuth2Attribute.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
+
+        log.info(oAuth2Attribute.toString());
         Map<String, Object> memberAttribute = oAuth2Attribute.convertToMap();
 
+        log.info(memberAttribute.toString());
         return new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")), memberAttribute, "email");
     }
 }

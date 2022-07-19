@@ -1,25 +1,39 @@
 package dcom.focuz.api.global.config.security;
 
+import dcom.focuz.api.domain.user.User;
+import dcom.focuz.api.domain.user.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
 import java.util.Base64;
 import java.util.Date;
 
 @Service
-public class TokenService{
+@RequiredArgsConstructor
+public class TokenService {
 
     @Value("${jwt.secret_key}")
     private String secretKey;
 
+    private final UserRepository userRepository;
+
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+    }
+
+    public User getUserByToken(String token) {
+        return userRepository.findUserById(Integer.valueOf(getUid(token))).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.")
+        );
     }
 
     public Token generateToken(String uid, String role) {

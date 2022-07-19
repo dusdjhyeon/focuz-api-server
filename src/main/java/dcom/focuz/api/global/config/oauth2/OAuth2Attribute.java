@@ -14,8 +14,8 @@ import java.util.Map;
 public class OAuth2Attribute {
     private Map<String, Object> attributes;
     private String attributeKey;
-    private String name;
     private String email;
+    private String name;
     private String picture;
 
     static OAuth2Attribute of(String provider, String attributeKey, Map<String, Object> attributes) {
@@ -25,21 +25,18 @@ public class OAuth2Attribute {
             case "kakao":
                 return ofKakao("email", attributes);
             case "naver":
-                return ofNaver("id", attributes);
+                return ofNaver("email", attributes);
             default:
                 throw new RuntimeException();
         }
     }
 
     private static OAuth2Attribute ofGoogle(String attributeKey, Map<String, Object> attributes) {
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
-        Map<String, Object> kakaoProfile = (Map<String, Object>) kakaoAccount.get("profile");
-
         return OAuth2Attribute.builder()
-                .name((String) kakaoProfile.get("name"))
-                .email((String) kakaoAccount.get("email"))
-                .picture((String) kakaoProfile.get("picture"))
-                .attributes(kakaoAccount)
+                .name((String) attributes.get("name"))
+                .email((String) attributes.get("email"))
+                .picture((String)attributes.get("picture"))
+                .attributes(attributes)
                 .attributeKey(attributeKey)
                 .build();
     }
