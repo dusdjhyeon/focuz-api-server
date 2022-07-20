@@ -1,5 +1,6 @@
 package dcom.focuz.api.domain.user.controller;
 
+import dcom.focuz.api.domain.user.dto.UserRequestDto;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import dcom.focuz.api.domain.user.service.UserService;
 import io.swagger.annotations.Api;
@@ -39,5 +40,12 @@ public class UserController {
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<UserResponseDto.Profile> getMyProfile() {
         return ResponseEntity.ok(userService.getMyProfile());
+    }
+
+    @ApiOperation("현재 유저를 정식 회원으로 등록합니다.")
+    @PostMapping(value = "/register")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<UserResponseDto.Profile> register(@Valid UserRequestDto.Register data) {
+        return ResponseEntity.ok(userService.register(data));
     }
 }
