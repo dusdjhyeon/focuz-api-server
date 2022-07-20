@@ -1,5 +1,6 @@
 package dcom.focuz.api.domain.user.service;
 
+import dcom.focuz.api.domain.user.Role;
 import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.dto.UserRequestDto;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
@@ -42,6 +43,22 @@ public class UserService {
                         HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."
                 )
         ));
+    }
+
+    public UserResponseDto.Profile register(UserRequestDto.Register data) {
+        User user = getCurrentUser();
+
+        if (user.getRole() != Role.GUEST) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "손님 권한을 가진 사람만 등록 할 수 있습니다."
+            );
+        }
+
+        user.setMotto(data.getMotto());
+        user.setNickname(data.getNickname());
+        user.setRole(Role.USER);
+
+        return UserResponseDto.Profile.of(userRepository.save(user));
     }
 
     @Transactional(readOnly = true)
