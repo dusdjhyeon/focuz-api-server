@@ -41,3 +41,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  server:
+    error:
+      include-message: always
