@@ -45,7 +45,7 @@ public class UserController {
     @ApiOperation("현재 유저를 정식 회원으로 등록합니다.")
     @PostMapping(value = "/register")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<UserResponseDto.Profile> register(@Valid UserRequestDto.Register data) {
+    public ResponseEntity<UserResponseDto.Profile> register(@Valid @RequestBody UserRequestDto.Register data) {
         return ResponseEntity.ok(userService.register(data));
     }
 }
