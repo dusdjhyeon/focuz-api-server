@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Api(tags = {"User Controller"})
@@ -29,7 +30,7 @@ public class UserController {
     @ApiOperation("해당 아이디를 가진 유저의 정보를 반환 합니다.")
     @GetMapping(value = "/{userId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<UserResponseDto.Profile> getUserById(@ApiParam(value="유저 ID", required = true) @PathVariable final Integer userId) {
+    public ResponseEntity<UserResponseDto.Profile> getUserById(@ApiParam(value="유저 ID", required = true) @PathVariable @Valid final Integer userId) {
         return ResponseEntity.ok(userService.findUserById(userId));
     }
 
