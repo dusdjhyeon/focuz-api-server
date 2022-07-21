@@ -45,6 +45,7 @@ public class UserService {
         ));
     }
 
+    @Transactional
     public UserResponseDto.Profile register(UserRequestDto.Register data) {
         User user = getCurrentUser();
 
