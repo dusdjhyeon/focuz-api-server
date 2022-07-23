@@ -1,6 +1,7 @@
 package dcom.focuz.api.domain.group.dto;
 
 import dcom.focuz.api.domain.group.Group;
+import dcom.focuz.api.domain.group.UserGroup;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GroupResponseDto {
     @ApiModel(value = "그룹 프로필 요약 정보")
@@ -32,13 +34,14 @@ public class GroupResponseDto {
         private Integer id;
         private String name;
         private String description;
-        private Set<UserResponseDto.Simple> users = new HashSet<>();
+        private Set<UserResponseDto.Simple> users;
 
         public static Info of(Group group) {
             return Info.builder()
                     .id(group.getId())
                     .name(group.getName())
                     .description(group.getName())
+                    .users(group.getUsers().stream().map(UserGroup::getUser).map(UserResponseDto.Simple::of).collect(Collectors.toSet()))
                     .build();
         }
     }
