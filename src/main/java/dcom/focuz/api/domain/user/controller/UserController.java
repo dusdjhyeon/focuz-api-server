@@ -43,6 +43,13 @@ public class UserController {
         return ResponseEntity.ok(userService.getMyProfile());
     }
 
+    @ApiOperation("현재 유저의 요약 정보를 반환 합니다.")
+    @GetMapping(value = "/my_profile/simple")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<UserResponseDto.Simple> getMySimpleProfile() {
+        return ResponseEntity.ok(userService.getMySimpleProfile());
+    }
+
     @ApiOperation("현재 유저를 정식 회원으로 등록합니다.")
     @PostMapping(value = "/register")
     @ResponseStatus(value = HttpStatus.OK)
