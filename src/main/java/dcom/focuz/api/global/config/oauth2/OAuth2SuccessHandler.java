@@ -8,6 +8,7 @@ import dcom.focuz.api.global.config.security.Token;
 import dcom.focuz.api.global.config.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -28,11 +29,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final TokenService tokenService;
     private final UserRepository userRepository;
 
+    @Value("${website.url}")
+    private String websiteURL;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();  // CustomOAuth2UserService에서 넘어옴.
         String email = (String) oAuth2User.getAttribute("email");// 그냥 email로 비교 할 예정
-        Optional<User> userOptional = userRepository.findUserByEmail(email);
+        Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
@@ -46,7 +50,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                         .build();
 
                 response.setHeader("Set-Cookie", cookie.toString());
-                getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/");
+                getRedirectStrategy().sendRedirect(request, response, websiteURL);
             } else if (user.getRole() == Role.GUEST) {
                 Token token = tokenService.generateToken(String.valueOf(user.getId()), Role.USER.getKey());
                 ResponseCookie cookie = ResponseCookie.from("accessToken", token.getToken())
@@ -55,9 +59,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                         .httpOnly(true)
                         .build();
                 response.setHeader("Set-Cookie", cookie.toString());
-                getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/user/register");
+                getRedirectStrategy().sendRedirect(request, response, websiteURL + "/user/register");
             } else {
-                getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/user/banned");
+                getRedirectStrategy().sendRedirect(request, response, websiteURL + "/user/banned");
             }
         } else {
             User user = userRepository.save(
@@ -78,7 +82,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     .build();
 
             response.setHeader("Set-Cookie", cookie.toString());
-            getRedirectStrategy().sendRedirect(request, response, "http://localhost:3000/user/register");
+            getRedirectStrategy().sendRedirect(request, response, websiteURL + "/user/register");
         }
     }
 }
