@@ -27,7 +27,7 @@ public class GroupRequestDto {
         public Group toEntity() {
             return Group.builder()
                     .name(this.name)
-                    .description(this.name)
+                    .description(this.description)
                     .build();
         }
     }
