@@ -26,14 +26,14 @@ public class GroupController {
     @ApiOperation("해당 아이디를 가진 그룹의 정보를 반환 합니다.")
     @GetMapping(value = "/{groupId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<GroupResponseDto.Info> getGroupById(@ApiParam(value="그룹 ID", required = true) @PathVariable final String groupId) {
-        return null;
+    public ResponseEntity<GroupResponseDto.Info> getGroupById(@ApiParam(value="그룹 ID", required = true) @PathVariable final Integer groupId) {
+        return ResponseEntity.ok(groupService.getGroupById(groupId));
     }
 
     @ApiOperation("그룹을 등록 합니다.")
-    @PostMapping("/")
+    @PostMapping("")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public ResponseEntity<String> postGroup(@Valid final GroupRequestDto.Register data) {
-        return ResponseEntity.status(HttpStatus.CREATED).body("/group/" + groupService.postRegister(data));
+    public ResponseEntity<String> postGroup(@Valid @RequestBody final GroupRequestDto.Register data) {
+        return ResponseEntity.status(HttpStatus.CREATED).body("/group/" + groupService.postGroup(data));
     }
 }

@@ -40,7 +40,7 @@ public class GroupResponseDto {
             return Info.builder()
                     .id(group.getId())
                     .name(group.getName())
-                    .description(group.getName())
+                    .description(group.getDescription())
                     .users(group.getUsers().stream().map(UserGroup::getUser).map(UserResponseDto.Simple::of).collect(Collectors.toSet()))
                     .build();
         }
