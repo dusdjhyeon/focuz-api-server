@@ -29,7 +29,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponseDto.Profile findUserById(Integer id) {
-        return UserResponseDto.Profile.of(userRepository.findUserAllById(id).orElseThrow(
+        return UserResponseDto.Profile.of(userRepository.getAllInfoOfUserById(id).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."
                 )
@@ -38,7 +38,16 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponseDto.Profile getMyProfile() {
-        return UserResponseDto.Profile.of(userRepository.findUserAllById(getCurrentUser().getId()).orElseThrow(
+        return UserResponseDto.Profile.of(userRepository.getAllInfoOfUserById(getCurrentUser().getId()).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."
+                )
+        ));
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponseDto.Simple getMySimpleProfile() {
+        return UserResponseDto.Simple.of(userRepository.findById(getCurrentUser().getId()).orElseThrow(
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."
                 )

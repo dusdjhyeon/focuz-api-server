@@ -31,7 +31,8 @@ public class UserController {
     @ApiOperation("해당 아이디를 가진 유저의 정보를 반환 합니다.")
     @GetMapping(value = "/{userId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<UserResponseDto.Profile> getUserById(@ApiParam(value="유저 ID", required = true) @PathVariable @Valid final Integer userId) {
+    public ResponseEntity<UserResponseDto.Profile> getUserById(@ApiParam(value="유저 ID", required = true)
+                                                               @PathVariable @Valid final Integer userId) {
         return ResponseEntity.ok(userService.findUserById(userId));
     }
 
@@ -42,10 +43,18 @@ public class UserController {
         return ResponseEntity.ok(userService.getMyProfile());
     }
 
+    @ApiOperation("현재 유저의 요약 정보를 반환 합니다.")
+    @GetMapping(value = "/my_profile/simple")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<UserResponseDto.Simple> getMySimpleProfile() {
+        return ResponseEntity.ok(userService.getMySimpleProfile());
+    }
+
     @ApiOperation("현재 유저를 정식 회원으로 등록합니다.")
     @PostMapping(value = "/register")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<UserResponseDto.Profile> register(@Valid @RequestBody UserRequestDto.Register data) {
+    public ResponseEntity<UserResponseDto.Profile> register(@ApiParam(value = "유저 정보")
+                                                            @Valid @RequestBody UserRequestDto.Register data) {
         return ResponseEntity.ok(userService.register(data));
     }
 }
