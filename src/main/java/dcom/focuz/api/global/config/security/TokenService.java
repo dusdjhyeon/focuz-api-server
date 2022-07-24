@@ -31,7 +31,7 @@ public class TokenService {
     }
 
     public User getUserByToken(String token) {
-        return userRepository.findUserById(Integer.valueOf(getUid(token))).orElseThrow(
+        return userRepository.findById(Integer.valueOf(getUid(token))).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.")
         );
     }
