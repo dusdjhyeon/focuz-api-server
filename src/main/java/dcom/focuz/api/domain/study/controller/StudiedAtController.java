@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-@Api(tags = {"User Controller"})
+@Api(tags = {"Study Controller"})
 @RestController
 @RequestMapping("/study")
 @RequiredArgsConstructor
