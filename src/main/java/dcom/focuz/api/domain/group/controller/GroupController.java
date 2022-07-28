@@ -36,4 +36,11 @@ public class GroupController {
     public ResponseEntity<String> postGroup(@Valid @RequestBody final GroupRequestDto.Register data) {
         return ResponseEntity.status(HttpStatus.CREATED).body("/group/" + groupService.postGroup(data));
     }
+
+//    @ApiOperation("그룹을 삭제 합니다.")
+//    @DeleteMapping("")
+//    @ResponseStatus(value = )
+
+//    @ApiOperation("해당 그룹의 멤버로 등록 합니다.")
+//    public ResponseEntity<>
 }
