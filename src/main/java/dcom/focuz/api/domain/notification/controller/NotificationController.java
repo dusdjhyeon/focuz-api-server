@@ -7,10 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,7 +19,7 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @ApiOperation("현재 온 알림을 가져 옵니다.")
-    @PostMapping(value = "/my")
+    @GetMapping(value = "/my")
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<List<NotificationResponseDto.Info>> getMyNotification() {
         return null;
