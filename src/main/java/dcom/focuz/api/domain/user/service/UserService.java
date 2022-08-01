@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository userRepository;
+    protected final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<UserResponseDto.Simple> getAllUser() {
