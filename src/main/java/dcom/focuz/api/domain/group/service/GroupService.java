@@ -168,4 +168,24 @@ public class GroupService {
 
         userGroupRepository.save(requestUserGroup);
     }
+
+    // 그룹 탈퇴
+    @Transactional
+    public void quitGroup(Integer groupId, Integer userId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
+        ));
+
+        User currentUser = userService.getCurrentUser();
+
+        UserGroup userGroup = userGroupRepository.findByUserAndGroup(currentUser, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+        ));
+
+        if (userGroup.getPermission() != UserGroupPermission.MEMBER) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.");
+        }
+
+        userGroupRepository.delete(userGroup);
+    }
 }
