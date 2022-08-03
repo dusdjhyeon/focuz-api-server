@@ -171,7 +171,7 @@ public class GroupService {
 
     // 그룹 탈퇴
     @Transactional
-    public void quitGroup(Integer groupId, Integer userId) {
+    public void quitGroup(Integer groupId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
         ));
@@ -188,4 +188,8 @@ public class GroupService {
 
         userGroupRepository.delete(userGroup);
     }
+    
+    // 멤버 강퇴 1. 그룹 확인 2. 현재 유저가 owner인지 확인 3. 강퇴할 멤버가 그룹에 있는지 확인 4. 멤버->강퇴멤버(enum 추가?) 5. 저~장
+    
+    // 멤버 강퇴 리스트
 }
