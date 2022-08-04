@@ -30,7 +30,6 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroupById(groupId));
     }
 
-    // String 맞나..?
     @ApiOperation("그룹을 등록 합니다.")
     @PostMapping("")
     @ResponseStatus(value = HttpStatus.CREATED)

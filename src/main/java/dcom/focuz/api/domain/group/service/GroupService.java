@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -118,10 +119,16 @@ public class GroupService {
                 HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
         ));
 
-        if (userGroupRepository.findByUserAndGroup(user, group).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "이미 요청 된 상태입니다."
-            );
+        Optional<UserGroup> userGroup = userGroupRepository.findByUserAndGroup(user, group);
+
+        if (userGroup.isPresent()) {
+            if (userGroup.get().getPermission() == UserGroupPermission.KICKOUTMEMBER)
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "강퇴 당한 그룹에는 다시 가입 요청을 할 수 없습니다."
+                );
+            else
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "이미 요청 된 상태입니다.");
         }
 
         userGroupRepository.save(
@@ -178,10 +185,10 @@ public class GroupService {
         User currentUser = userService.getCurrentUser();
 
         UserGroup userGroup = userGroupRepository.findByUserAndGroup(currentUser, group).orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+                HttpStatus.BAD_REQUEST, "잘못된 요청입니다."
         ));
 
-        if (userGroup.getPermission() != UserGroupPermission.MEMBER) {
+        if ((userGroup.getPermission() != UserGroupPermission.MEMBER) || (userGroup.getPermission() != UserGroupPermission.MANAGER))  {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.");
         }
 
@@ -201,7 +208,7 @@ public class GroupService {
                 HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
         ));
 
-        if (currentUserGroup.getPermission() != UserGroupPermission.OWNER) {
+        if ((currentUserGroup.getPermission() != UserGroupPermission.OWNER) || currentUserGroup.getPermission() != UserGroupPermission.MANAGER) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "강퇴시킬 권한이 없습니다.");
         }
 
@@ -210,7 +217,7 @@ public class GroupService {
         ));
 
         UserGroup kickOutUserGroup = userGroupRepository.findByUserAndGroup(kickOutUser, group).orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+                HttpStatus.BAD_REQUEST, "잘못된 요청입니다."
         ));
 
         kickOutUserGroup.setPermission(UserGroupPermission.KICKOUTMEMBER);
@@ -219,5 +226,6 @@ public class GroupService {
 
         return userId;
     }
+
     // 멤버 강퇴 리스트
 }
