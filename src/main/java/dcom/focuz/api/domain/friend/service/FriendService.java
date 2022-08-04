@@ -3,6 +3,8 @@ package dcom.focuz.api.domain.friend.service;
 import dcom.focuz.api.domain.friend.Friend;
 import dcom.focuz.api.domain.friend.FriendState;
 import dcom.focuz.api.domain.friend.repository.FriendRepository;
+import dcom.focuz.api.domain.notification.Notification;
+import dcom.focuz.api.domain.notification.repository.NotificationRepository;
 import dcom.focuz.api.domain.user.Role;
 import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
+    private final NotificationRepository notificationRepository;
     private final UserService userService;
 
     @Transactional
@@ -60,6 +63,14 @@ public class FriendService {
                     HttpStatus.BAD_REQUEST,"이미 관계가 존재하는 유저입니다."
             );
         }
+
+        notificationRepository.save(
+                Notification.builder()
+                        .user(targetUser)
+                        .message(String.format("%s님에게 친구 추가 요청이 왔습니다.", currentUser.getNickname()))
+                        .url("/friend/requestList/")
+                        .build()
+        );
 
 
         return UserResponseDto.Simple.of(targetUser);
