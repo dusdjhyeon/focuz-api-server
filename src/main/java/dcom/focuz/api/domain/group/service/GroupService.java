@@ -97,7 +97,6 @@ public class GroupService {
 
         User user = userService.getCurrentUser();
         
-        // owner나 manager가 아니면 권한 없음
         UserGroup userGroup = userGroupRepository.findByUserAndGroup(user, group).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
         ));
@@ -189,7 +188,36 @@ public class GroupService {
         userGroupRepository.delete(userGroup);
     }
     
-    // 멤버 강퇴 1. 그룹 확인 2. 현재 유저가 owner인지 확인 3. 강퇴할 멤버가 그룹에 있는지 확인 4. 멤버->강퇴멤버(enum 추가?) 5. 저~장
-    
+    // 멤버 강퇴
+    @Transactional
+    public Integer kickOutOfGroup(Integer groupId, Integer userId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
+        ));
+
+        User currentUser = userService.getCurrentUser();
+
+        UserGroup currentUserGroup = userGroupRepository.findByUserAndGroup(currentUser, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+        ));
+
+        if (currentUserGroup.getPermission() != UserGroupPermission.OWNER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "강퇴시킬 권한이 없습니다.");
+        }
+
+        User kickOutUser = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "해당된 유저가 존재하지 않습니다."
+        ));
+
+        UserGroup kickOutUserGroup = userGroupRepository.findByUserAndGroup(kickOutUser, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+        ));
+
+        kickOutUserGroup.setPermission(UserGroupPermission.KICKOUTMEMBER);
+
+        userGroupRepository.save(kickOutUserGroup);
+
+        return userId;
+    }
     // 멤버 강퇴 리스트
 }
