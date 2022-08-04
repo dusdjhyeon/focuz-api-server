@@ -28,6 +28,6 @@ public class Group {
     @Column
     private String description;
 
-    @OneToMany(mappedBy = "group")
+    @OneToMany(mappedBy = "group", cascade = {CascadeType.REMOVE})
     private Set<UserGroup> users = new HashSet<>();
 }
