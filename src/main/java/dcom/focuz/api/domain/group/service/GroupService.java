@@ -197,7 +197,7 @@ public class GroupService {
     
     // 멤버 강퇴
     @Transactional
-    public Integer kickOutOfGroup(Integer groupId, Integer userId) {
+    public void kickOutOfGroup(Integer groupId, Integer userId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
         ));
@@ -223,9 +223,26 @@ public class GroupService {
         kickOutUserGroup.setPermission(UserGroupPermission.KICKOUTMEMBER);
 
         userGroupRepository.save(kickOutUserGroup);
-
-        return userId;
     }
 
     // 멤버 강퇴 리스트
+    @Transactional
+    public List<UserResponseDto.Simple> getKickOutMemberOfGroupList(Integer groupId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
+        ));
+
+        User currentUser = userService.getCurrentUser();
+
+        UserGroup userGroup = userGroupRepository.findByUserAndGroup(currentUser, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+        ));
+
+        if ((userGroup.getPermission() != UserGroupPermission.OWNER) || (userGroup.getPermission() != UserGroupPermission.MANAGER)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "강퇴 목록을 볼 권한이 없습니다.");
+        }
+
+        return userGroupRepository.findAllByGroupAndPermission(group, UserGroupPermission.KICKOUTMEMBER)
+                .stream().map(UserGroup::getUser).map(UserResponseDto.Simple::of).collect(Collectors.toList());
+    }
 }
