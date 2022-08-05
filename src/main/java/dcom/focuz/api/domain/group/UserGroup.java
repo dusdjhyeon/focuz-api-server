@@ -40,4 +40,7 @@ public class UserGroup {
 
     @Column
     private UserGroupPermission permission;
+
+    @Column(name = "study_time")
+    private Long studyTime;
 }
