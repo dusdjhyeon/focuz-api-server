@@ -3,6 +3,8 @@ package dcom.focuz.api.domain.friend.service;
 import dcom.focuz.api.domain.friend.Friend;
 import dcom.focuz.api.domain.friend.FriendState;
 import dcom.focuz.api.domain.friend.repository.FriendRepository;
+import dcom.focuz.api.domain.notification.Notification;
+import dcom.focuz.api.domain.notification.repository.NotificationRepository;
 import dcom.focuz.api.domain.user.Role;
 import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
@@ -24,6 +26,7 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
     private final UserService userService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public UserResponseDto.Simple friendRequest(Integer targetUserId) {
@@ -61,6 +64,14 @@ public class FriendService {
             );
         }
 
+        notificationRepository.save(
+                Notification.builder()
+                        .user(targetUser)
+                        .message(String.format("%s님에게서 친구 추가 요청이 왔습니다.", currentUser.getNickname()))
+                        .url("/")
+                        .build()
+        );
+
 
         return UserResponseDto.Simple.of(targetUser);
 
@@ -84,8 +95,6 @@ public class FriendService {
         );
     }
 
-    //-----------------------여기서부터 내가 짠 코드--------------------------//
-
     @Transactional
     public UserResponseDto.Simple acceptFriendRequest(Integer targetUserId){
         User currentUser = userService.getCurrentUser();
@@ -100,11 +109,8 @@ public class FriendService {
                 () -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "친구 관계가 없습니다."
                 )
-        );//상대의 타겟이 나인 친구 관계 확인
+        );
 
-        //요청을 받는 로직->요청 Friend에서 current = 상대, target = 나, state = REQUEST
-        // 그럼 새로 추가 : current = 나, target = 상대, state = FRIEND를 새로 추가
-        // 그럼 수정(setState) : current = 상대, target = 나 에서 state를 FRIEND로
         if(friend.getState() == FriendState.REQUEST) {
             friendRepository.save(
                     Friend.builder()
@@ -115,13 +121,20 @@ public class FriendService {
             );
 
             friend.setState(FriendState.FRIEND);
-
-            return UserResponseDto.Simple.of(targetUser);
         }
         else{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"요청 상태가 아닙니다.");
         }
 
+        notificationRepository.save(
+                Notification.builder()
+                        .user(targetUser)
+                        .message(String.format("%s님과 친구가 되었습니다.", currentUser.getNickname()))
+                        .url("/")
+                        .build()
+        );
+
+        return UserResponseDto.Simple.of(targetUser);
     }
 
     @Transactional(readOnly = true)
@@ -157,7 +170,7 @@ public class FriendService {
         );
         Friend data2 = friendRepository.findByUserAndTargetUser(targetUser,currentUser).orElseThrow(
                 () -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "친구 간 상태가 없습니다.."
+                        HttpStatus.NOT_FOUND, "친구 간 상태가 없습니다."
                 )
         );
         //이미 친구인지 확인
@@ -192,13 +205,7 @@ public class FriendService {
                     HttpStatus.FORBIDDEN, "해당 하는 유저는 비활성화 된 유저입니다."
             );
         }
-        
-        //empty 확인할 때, targetuser가 앞에...? 
-        //state = friend =? (targetuser ->currentuser),(currentuser->targetuser)
-        //state = request =? (target->current))
-        //state = blocked =? 밑에서 처리 해 줌
-        //이미 상대가 차단 했으면 서로 차단..???(targetuser->currentuser)
-        // ? : 모든 코드에 차단 유저는 볼 수 없는 처리 할 필요 없나..? 또, 차단 시 그동안의 targetuser가 currentuser 상태에서 이루어지는 요청 처리는?(ex-request,friend관계중 target->current 기준)
+
         if(friendRepository.findByUserAndTargetUser(currentUser, targetUser).isEmpty()){
             friendRepository.save(
                     Friend.builder()
@@ -216,8 +223,14 @@ public class FriendService {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "이미 차단 된 유저입니다."
                 );
-            }
-            else{
+            } else if (friend.getState()==FriendState.FRIEND) {
+                Friend data = friendRepository.findByUserAndTargetUser(targetUser,currentUser).orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "잘못된 요청입니다."
+                        )
+                );
+                friendRepository.delete(data);
+            } else{
                 friend.setState(FriendState.BLOCKED);
             }
         }
