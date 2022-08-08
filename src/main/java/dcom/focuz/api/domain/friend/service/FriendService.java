@@ -72,7 +72,6 @@ public class FriendService {
                         .build()
         );
 
-
         return UserResponseDto.Simple.of(targetUser);
 
     }
