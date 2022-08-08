@@ -16,4 +16,5 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
     @Query("select ug from UserGroup ug left join fetch ug.user where ug.group = :groupObj and ug.permission = :permission")
     List<UserGroup> findAllByGroupAndPermission(Group groupObj, UserGroupPermission permission);
     Optional<UserGroup> findByUserAndGroup(User user, Group groupObj);
+    List<UserGroup> findAllByUser(User user);
 }

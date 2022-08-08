@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class FriendService {
     private final UserRepository userRepository;
     private final FriendRepository friendRepository;
+    private final NotificationRepository notificationRepository;
     private final UserService userService;
     private final NotificationRepository notificationRepository;
 
@@ -71,7 +72,6 @@ public class FriendService {
                         .url("/")
                         .build()
         );
-
 
         return UserResponseDto.Simple.of(targetUser);
 
