@@ -27,7 +27,6 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final NotificationRepository notificationRepository;
     private final UserService userService;
-    private final NotificationRepository notificationRepository;
 
     @Transactional
     public UserResponseDto.Simple friendRequest(Integer targetUserId) {
