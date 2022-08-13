@@ -8,6 +8,7 @@ import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class GroupController {
     @ApiOperation("해당 아이디를 가진 그룹의 정보를 반환 합니다.")
     @GetMapping(value = "/{groupId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<GroupResponseDto.Info> getGroupById(@ApiParam(value="그룹 ID", required = true) @PathVariable @Valid final Integer groupId) {
+    public ResponseEntity<GroupResponseDto.Info> getGroupById(@ApiParam(value="그룹 ID", required = true) @PathVariable final Integer groupId) {
         return ResponseEntity.ok(groupService.getGroupById(groupId));
     }
 
@@ -89,5 +90,29 @@ public class GroupController {
     @GetMapping(value = "/kickOutList/{groupId}")
     public ResponseEntity<List<UserResponseDto.Simple>> getKickOutMemberOfGroupList(@ApiParam(value = "그룹 ID", required = true) @PathVariable final Integer groupId) {
         return ResponseEntity.ok(groupService.getKickOutMemberOfGroupList(groupId));
+    }
+
+    @ApiOperation("해당 그룹의 멤버 목록을 보여줍니다.")
+    @GetMapping(value = "/list/{groupId}")
+    public ResponseEntity<List<UserResponseDto.Simple>> getMemberListForGroup(@ApiParam(value = "그룹 ID", required = true) @PathVariable final Integer groupId) {
+        return ResponseEntity.ok(groupService.getMemberListForGroup(groupId));
+    }
+
+    @ApiOperation("해당 멤버를 매니저로 등록합니다.")
+    @PostMapping(value = "/manager/{groupId}/{userId}")
+    public ResponseEntity<Void> appointManagerOfGroup(@ApiParam(value = "그룹 ID", required = true) @PathVariable final Integer groupId,
+                                                      @ApiParam(value = "유저 ID", required = true) @PathVariable final Integer userId) {
+        groupService.appointManagerOfGroup(groupId, userId);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @ApiOperation("매니저를 일반 회원 자격으로 바꿉니다.")
+    @PostMapping(value = "disManager/{groupId}/{userId}")
+    public ResponseEntity<Void> dismissManagerOfGroup(@ApiParam(value = "그룹 ID", required = true) @PathVariable final Integer groupId,
+                                                      @ApiParam(value = "유저 ID", required = true) @PathVariable final Integer userId) {
+        groupService.dismissManagerOfGroup(groupId, userId);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 }

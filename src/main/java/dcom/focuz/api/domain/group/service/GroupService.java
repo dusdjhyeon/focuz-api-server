@@ -12,7 +12,6 @@ import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import dcom.focuz.api.domain.user.repository.UserRepository;
 import dcom.focuz.api.domain.user.service.UserService;
-import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -244,5 +243,77 @@ public class GroupService {
 
         return userGroupRepository.findAllByGroupAndPermission(group, UserGroupPermission.KICKOUTMEMBER)
                 .stream().map(UserGroup::getUser).map(UserResponseDto.Simple::of).collect(Collectors.toList());
+    }
+
+    // 그룹 멤버 리스트
+    @Transactional
+    public List<UserResponseDto.Simple> getMemberListForGroup(Integer groupId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
+        ));
+
+        User user = userService.getCurrentUser();
+
+        if (user.getRole() != Role.USER) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "권한이 없습니다.");
+        }
+
+        return userGroupRepository.findAllByGroupAndPermission(group, UserGroupPermission.MEMBER)
+                .stream().map(UserGroup::getUser).map(UserResponseDto.Simple::of).collect(Collectors.toList());
+    }
+
+    // 매니저 등록
+    @Transactional
+    public void appointManagerOfGroup(Integer groupId, Integer userId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
+        ));
+
+        User owner = userService.getCurrentUser();
+
+        UserGroup ownerGroup = userGroupRepository.findByUserAndGroup(owner, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+        ));
+
+        if (ownerGroup.getPermission() != UserGroupPermission.OWNER)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+
+        User manager = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."
+        ));
+
+        UserGroup managerGroup = userGroupRepository.findByUserAndGroup(manager, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "잘못된 요청입니다."
+        ));
+
+        managerGroup.setPermission(UserGroupPermission.MANAGER);
+
+        userGroupRepository.save(managerGroup);
+    }
+
+    // 매니저 삭제
+    @Transactional
+    public void dismissManagerOfGroup(Integer groupId, Integer userId) {
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
+        ));
+
+        User owner = userService.getCurrentUser();
+
+        UserGroup ownerGroup = userGroupRepository.findByUserAndGroup(owner, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
+        ));
+
+        User manager = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."
+        ));
+
+        UserGroup managerGroup = userGroupRepository.findByUserAndGroup(manager, group).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "잘못된 요청입니다."
+        ));
+
+        managerGroup.setPermission(UserGroupPermission.MEMBER);
+
+        userGroupRepository.save(managerGroup);
     }
 }
