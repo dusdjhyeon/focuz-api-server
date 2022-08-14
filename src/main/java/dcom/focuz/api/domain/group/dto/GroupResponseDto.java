@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +23,18 @@ public class GroupResponseDto {
         private Integer id;
         private String name;
         private String description;
+
+        public static Simple of(Group group) {
+            return Simple.builder()
+                    .id(group.getId())
+                    .name(group.getName())
+                    .description(group.getDescription())
+                    .build();
+        }
+
+        public static List<Simple> of(List<Group> groups) {
+            return groups.stream().map(Simple::of).collect(Collectors.toList());
+        }
     }
 
     @ApiModel(value = "그룹 프로필 세부 정보")

@@ -7,11 +7,14 @@ import dcom.focuz.api.domain.group.dto.GroupRequestDto;
 import dcom.focuz.api.domain.group.dto.GroupResponseDto;
 import dcom.focuz.api.domain.group.repository.GroupRepository;
 import dcom.focuz.api.domain.group.repository.UserGroupRepository;
+import dcom.focuz.api.domain.notification.Notification;
+import dcom.focuz.api.domain.notification.repository.NotificationRepository;
 import dcom.focuz.api.domain.user.Role;
 import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import dcom.focuz.api.domain.user.repository.UserRepository;
 import dcom.focuz.api.domain.user.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,7 @@ public class GroupService {
     private final UserGroupRepository userGroupRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
     @Transactional(readOnly = true)
     public GroupResponseDto.Info findGroupById(Integer id) {
@@ -81,6 +85,7 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
+    // 그룹 아이디로 검색
     @Transactional(readOnly = true)
     public GroupResponseDto.Info getGroupById(Integer id) {
         return GroupResponseDto.Info.of(groupRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
@@ -172,6 +177,14 @@ public class GroupService {
         requestUserGroup.setPermission(UserGroupPermission.MEMBER);
 
         userGroupRepository.save(requestUserGroup);
+
+        notificationRepository.save(
+                Notification.builder()
+                        .user(requestUser)
+                        .message(String.format("%s님이 %s에 가입되었습니다.", currentUser.getNickname(), group.getName()))
+                        .url("/")
+                        .build()
+        );
     }
 
     // 그룹 탈퇴
@@ -222,10 +235,18 @@ public class GroupService {
         kickOutUserGroup.setPermission(UserGroupPermission.KICKOUTMEMBER);
 
         userGroupRepository.save(kickOutUserGroup);
+
+        notificationRepository.save(
+                Notification.builder()
+                        .user(kickOutUser)
+                        .message(String.format("%s님이 %s에서 강퇴 처리 되었습니다.", kickOutUser.getNickname(), group.getName()))
+                        .url("/")
+                        .build()
+        );
     }
 
     // 멤버 강퇴 리스트
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserResponseDto.Simple> getKickOutMemberOfGroupList(Integer groupId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
@@ -246,7 +267,7 @@ public class GroupService {
     }
 
     // 그룹 멤버 리스트
-    @Transactional
+    @Transactional(readOnly = true)
     public List<UserResponseDto.Simple> getMemberListForGroup(Integer groupId) {
         Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "해당하는 ID를 가진 그룹이 존재하지 않습니다."
@@ -289,6 +310,14 @@ public class GroupService {
         managerGroup.setPermission(UserGroupPermission.MANAGER);
 
         userGroupRepository.save(managerGroup);
+
+        notificationRepository.save(
+                Notification.builder()
+                        .user(manager)
+                        .message(String.format("%s님이 %s의 매니저가 되었습니다.", manager.getNickname(), group.getName()))
+                        .url("/")
+                        .build()
+        );
     }
 
     // 매니저 삭제
@@ -315,5 +344,38 @@ public class GroupService {
         managerGroup.setPermission(UserGroupPermission.MEMBER);
 
         userGroupRepository.save(managerGroup);
+
+        notificationRepository.save(
+                Notification.builder()
+                        .user(manager)
+                        .message(String.format("%s님은 %s의 일반 회원으로 전환되었습니다.", manager.getNickname(), group.getName()))
+                        .url("/")
+                        .build()
+        );
+    }
+
+    // 그룹 전체 리스트
+    @Transactional(readOnly = true)
+    public List<GroupResponseDto.Simple> getAllGroup() {
+
+        return GroupResponseDto.Simple.of(groupRepository.findAll());
+    }
+
+    // 해당 유저의 그룹 리스트
+    @Transactional(readOnly = true)
+    public List<GroupResponseDto.Simple> getAllMyGroups(Integer userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."
+        ));
+
+        return userGroupRepository.findAllByUser(user)
+                .stream().map(UserGroup::getGroup).map(GroupResponseDto.Simple::of).collect(Collectors.toList());
+    }
+
+    // 그룹 이름으로 검색
+    @Transactional(readOnly = true)
+    public List<GroupResponseDto.Simple> findByNameContains(String query) {
+        return groupRepository.findByNameContains(query)
+                .stream().map(GroupResponseDto.Simple::of).collect(Collectors.toList());
     }
 }

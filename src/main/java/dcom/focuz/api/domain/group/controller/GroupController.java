@@ -24,13 +24,6 @@ import java.util.List;
 public class GroupController {
     private final GroupService groupService;
 
-    @ApiOperation("해당 아이디를 가진 그룹의 정보를 반환 합니다.")
-    @GetMapping(value = "/{groupId}")
-    @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<GroupResponseDto.Info> getGroupById(@ApiParam(value="그룹 ID", required = true) @PathVariable final Integer groupId) {
-        return ResponseEntity.ok(groupService.getGroupById(groupId));
-    }
-
     @ApiOperation("그룹을 등록 합니다.")
     @PostMapping("")
     @ResponseStatus(value = HttpStatus.CREATED)
@@ -44,6 +37,13 @@ public class GroupController {
         groupService.deleteGroup(groupId);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @ApiOperation("해당 아이디를 가진 그룹의 정보를 반환 합니다.")
+    @GetMapping(value = "/{groupId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<GroupResponseDto.Info> getGroupById(@ApiParam(value="그룹 ID", required = true) @PathVariable final Integer groupId) {
+        return ResponseEntity.ok(groupService.getGroupById(groupId));
     }
 
     @ApiOperation("그룹 가입 신청 목록을 보여줍니다.")
@@ -93,7 +93,7 @@ public class GroupController {
     }
 
     @ApiOperation("해당 그룹의 멤버 목록을 보여줍니다.")
-    @GetMapping(value = "/list/{groupId}")
+    @GetMapping(value = "/{groupId}/list")
     public ResponseEntity<List<UserResponseDto.Simple>> getMemberListForGroup(@ApiParam(value = "그룹 ID", required = true) @PathVariable final Integer groupId) {
         return ResponseEntity.ok(groupService.getMemberListForGroup(groupId));
     }
@@ -108,11 +108,29 @@ public class GroupController {
     }
 
     @ApiOperation("매니저를 일반 회원 자격으로 바꿉니다.")
-    @PostMapping(value = "disManager/{groupId}/{userId}")
+    @PostMapping(value = "/disManager/{groupId}/{userId}")
     public ResponseEntity<Void> dismissManagerOfGroup(@ApiParam(value = "그룹 ID", required = true) @PathVariable final Integer groupId,
                                                       @ApiParam(value = "유저 ID", required = true) @PathVariable final Integer userId) {
         groupService.dismissManagerOfGroup(groupId, userId);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @ApiOperation("그룹 전체 목록을 보여줍니다.")
+    @GetMapping(value = "/list")
+    public ResponseEntity<List<GroupResponseDto.Simple>> getAllGroup() {
+        return ResponseEntity.ok(groupService.getAllGroup());
+    }
+
+    @ApiOperation("해당 유저가 속해 있는 모든 그룹 목록을 보여줍니다.")
+    @GetMapping(value = "/list/{userId}")
+    public ResponseEntity<List<GroupResponseDto.Simple>> getAllMyGroups(@ApiParam(value = "유저 ID", required = true) @PathVariable final Integer userId) {
+        return ResponseEntity.ok(groupService.getAllMyGroups(userId));
+    }
+
+    @ApiOperation("그룹을 이름을 통해 검색합니다.")
+    @GetMapping(value = "/search/{query}")
+    public ResponseEntity<List<GroupResponseDto.Simple>> searchGroup(@PathVariable final String query) {
+        return ResponseEntity.ok(groupService.findByNameContains(query));
     }
 }
