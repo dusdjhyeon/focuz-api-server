@@ -2,6 +2,7 @@ package dcom.focuz.api.domain.study.controller;
 
 import dcom.focuz.api.domain.study.dto.StudiedAtRequestDto;
 import dcom.focuz.api.domain.study.dto.StudiedAtResponseDto;
+import dcom.focuz.api.domain.study.dto.TempStudyRequestDto;
 import dcom.focuz.api.domain.study.service.StudiedAtService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,15 +23,23 @@ public class StudiedAtController {
 
     @ApiOperation("현재 공부 한 시간을 추가 합니다.")
     @PostMapping(value = "")
-    @ResponseStatus(value = HttpStatus.OK)
+    @ResponseStatus(value = HttpStatus.ACCEPTED)
     public ResponseEntity<Void> studyTime() {
-        return null;
+        studiedAtService.updateDataBase();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @ApiOperation("해당 범위 내, 공부 한 시간을 반환 합니다.")
     @GetMapping(value = "/search")
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<List<StudiedAtResponseDto.Simple>> getStudies(@Valid StudiedAtRequestDto.Search search) {
-        return null;
+        return ResponseEntity.ok(studiedAtService.getStudies(search));
+    }
+
+    @ApiOperation("요청 받은 시간을 레디스에 추가 합니다.")
+    @PostMapping(value = "/add")
+    @ResponseStatus(value = HttpStatus.OK)
+    public ResponseEntity<Integer> updateStudyTime(@Valid TempStudyRequestDto.Seconds seconds){
+        return ResponseEntity.ok(studiedAtService.updateStudyTime(seconds));
     }
 }
