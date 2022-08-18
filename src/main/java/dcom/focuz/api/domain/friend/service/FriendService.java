@@ -27,7 +27,6 @@ public class FriendService {
     private final FriendRepository friendRepository;
     private final NotificationRepository notificationRepository;
     private final UserService userService;
-    private final NotificationRepository notificationRepository;
 
     @Transactional
     public UserResponseDto.Simple friendRequest(Integer targetUserId) {
@@ -121,6 +120,7 @@ public class FriendService {
             );
 
             friend.setState(FriendState.FRIEND);
+            friendRepository.save(friend);
         }
         else{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"요청 상태가 아닙니다.");
@@ -232,6 +232,7 @@ public class FriendService {
                 friendRepository.delete(data);
             } else{
                 friend.setState(FriendState.BLOCKED);
+                friendRepository.save(friend);
             }
         }
 
