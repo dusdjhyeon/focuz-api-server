@@ -120,6 +120,7 @@ public class FriendService {
             );
 
             friend.setState(FriendState.FRIEND);
+            friendRepository.save(friend);
         }
         else{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"요청 상태가 아닙니다.");
@@ -231,6 +232,7 @@ public class FriendService {
                 friendRepository.delete(data);
             } else{
                 friend.setState(FriendState.BLOCKED);
+                friendRepository.save(friend);
             }
         }
 
