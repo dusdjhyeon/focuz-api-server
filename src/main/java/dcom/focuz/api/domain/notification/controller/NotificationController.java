@@ -16,12 +16,12 @@ import java.util.List;
 @RequestMapping("/notification")
 @RequiredArgsConstructor
 public class NotificationController {
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     @ApiOperation("현재 온 알림을 가져 옵니다.")
     @GetMapping(value = "/my")
     @ResponseStatus(value = HttpStatus.OK)
     public ResponseEntity<List<NotificationResponseDto.Info>> getMyNotification() {
-        return null;
+        return ResponseEntity.ok(notificationService.getMyNotification());
     }
 }
