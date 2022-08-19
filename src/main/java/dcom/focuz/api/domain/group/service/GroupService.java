@@ -14,7 +14,6 @@ import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import dcom.focuz.api.domain.user.repository.UserRepository;
 import dcom.focuz.api.domain.user.service.UserService;
-import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,14 +33,6 @@ public class GroupService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
 
-    @Transactional(readOnly = true)
-    public GroupResponseDto.Info findGroupById(Integer id) {
-        return GroupResponseDto.Info.of(groupRepository.findAllInfoById(id).orElseThrow(
-                () -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "그룹을 찾을 수 없습니다."
-                )
-        ));
-    }
 
     // 그룹 생성
     @Transactional
@@ -59,6 +50,14 @@ public class GroupService {
                         .user(userService.getCurrentUser())
                         .group(group)
                         .permission(UserGroupPermission.OWNER)
+                        .build()
+        );
+
+        notificationRepository.save(
+                Notification.builder()
+                        .user(user)
+                        .message(String.format("%s 그룹이 생성되었습니다! 회원들을 초대해보세요.", group.getName()))
+                        .url("/")
                         .build()
         );
 
@@ -142,6 +141,18 @@ public class GroupService {
                         .permission(UserGroupPermission.NONMEMBER)
                         .build()
         );
+
+        List<User> groupManagerAndOwner = getGroupManagerAndOwner(group);
+
+        notificationRepository.saveAll(
+                groupManagerAndOwner.stream().map(
+                        u -> Notification.builder()
+                                .user(u)
+                                .message(String.format("%s 님이 %s 그룹에 들어오고 싶어 합니다!", user.getNickname(), group.getName()))
+                                .url("")
+                                .build()
+               ).collect(Collectors.toList())
+        );
     }
 
 
@@ -181,7 +192,7 @@ public class GroupService {
         notificationRepository.save(
                 Notification.builder()
                         .user(requestUser)
-                        .message(String.format("%s님이 %s에 가입되었습니다.", currentUser.getNickname(), group.getName()))
+                        .message(String.format("%s 님이 %s 그룹에 가입되었습니다.", currentUser.getNickname(), group.getName()))
                         .url("/")
                         .build()
         );
@@ -200,11 +211,23 @@ public class GroupService {
                 HttpStatus.BAD_REQUEST, "잘못된 요청입니다."
         ));
 
-        if ((userGroup.getPermission() != UserGroupPermission.MEMBER) || (userGroup.getPermission() != UserGroupPermission.MANAGER))  {
+        if (!(userGroup.getPermission() == UserGroupPermission.MEMBER || userGroup.getPermission() == UserGroupPermission.MANAGER)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.");
         }
 
         userGroupRepository.delete(userGroup);
+
+        List<User> groupManagerAndOwner = getGroupManagerAndOwner(group);
+
+        notificationRepository.saveAll(
+                groupManagerAndOwner.stream().map(
+                        u -> Notification.builder()
+                                .user(u)
+                                .message(String.format("%s 님이 %s 그룹에서 나갔습니다.", currentUser.getNickname(), group.getName()))
+                                .url("")
+                                .build()
+                ).collect(Collectors.toList())
+        );
     }
     
     // 멤버 강퇴
@@ -220,7 +243,7 @@ public class GroupService {
                 HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
         ));
 
-        if ((currentUserGroup.getPermission() != UserGroupPermission.OWNER) || currentUserGroup.getPermission() != UserGroupPermission.MANAGER) {
+        if (!(currentUserGroup.getPermission() == UserGroupPermission.OWNER) || currentUserGroup.getPermission() == UserGroupPermission.MANAGER) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "강퇴시킬 권한이 없습니다.");
         }
 
@@ -239,7 +262,7 @@ public class GroupService {
         notificationRepository.save(
                 Notification.builder()
                         .user(kickOutUser)
-                        .message(String.format("%s님이 %s에서 강퇴 처리 되었습니다.", kickOutUser.getNickname(), group.getName()))
+                        .message(String.format("%s님이 %s에서 강퇴 처리 되었습니다. 재가입할 수 없습니다.", kickOutUser.getNickname(), group.getName()))
                         .url("/")
                         .build()
         );
@@ -258,7 +281,7 @@ public class GroupService {
                 HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
         ));
 
-        if ((userGroup.getPermission() != UserGroupPermission.OWNER) || (userGroup.getPermission() != UserGroupPermission.MANAGER)) {
+        if (!(userGroup.getPermission() == UserGroupPermission.OWNER) || (userGroup.getPermission() == UserGroupPermission.MANAGER)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "강퇴 목록을 볼 권한이 없습니다.");
         }
 
@@ -279,7 +302,7 @@ public class GroupService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "권한이 없습니다.");
         }
 
-        return userGroupRepository.findAllByGroupAndPermission(group, UserGroupPermission.MEMBER)
+        return userGroupRepository.findAllMemberByGroup(group)
                 .stream().map(UserGroup::getUser).map(UserResponseDto.Simple::of).collect(Collectors.toList());
     }
 
@@ -314,7 +337,7 @@ public class GroupService {
         notificationRepository.save(
                 Notification.builder()
                         .user(manager)
-                        .message(String.format("%s님이 %s의 매니저가 되었습니다.", manager.getNickname(), group.getName()))
+                        .message(String.format("%s님이 %s 그룹의 매니저가 되었습니다.", manager.getNickname(), group.getName()))
                         .url("/")
                         .build()
         );
@@ -333,6 +356,10 @@ public class GroupService {
                 HttpStatus.FORBIDDEN, "접근 권한이 없습니다."
         ));
 
+        if (ownerGroup.getPermission() != UserGroupPermission.OWNER) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "권한이 없습니다.");
+        }
+
         User manager = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."
         ));
@@ -341,6 +368,10 @@ public class GroupService {
                 HttpStatus.BAD_REQUEST, "잘못된 요청입니다."
         ));
 
+        if (managerGroup.getPermission() != UserGroupPermission.MANAGER) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.");
+        }
+
         managerGroup.setPermission(UserGroupPermission.MEMBER);
 
         userGroupRepository.save(managerGroup);
@@ -348,7 +379,7 @@ public class GroupService {
         notificationRepository.save(
                 Notification.builder()
                         .user(manager)
-                        .message(String.format("%s님은 %s의 일반 회원으로 전환되었습니다.", manager.getNickname(), group.getName()))
+                        .message(String.format("%s님은 %s 그룹의 일반 회원으로 전환되었습니다.", manager.getNickname(), group.getName()))
                         .url("/")
                         .build()
         );
@@ -377,5 +408,10 @@ public class GroupService {
     public List<GroupResponseDto.Simple> findByNameContains(String query) {
         return groupRepository.findByNameContains(query)
                 .stream().map(GroupResponseDto.Simple::of).collect(Collectors.toList());
+    }
+
+    private List<User> getGroupManagerAndOwner(Group group) {
+        return userGroupRepository.findAllByGroupHasManagePermission(group)
+                .stream().map(UserGroup::getUser).collect(Collectors.toList());
     }
 }

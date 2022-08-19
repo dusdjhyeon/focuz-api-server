@@ -2,6 +2,7 @@ package dcom.focuz.api.domain.notification.service;
 
 import dcom.focuz.api.domain.notification.dto.NotificationResponseDto;
 import dcom.focuz.api.domain.notification.repository.NotificationRepository;
+import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,18 +15,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-    private NotificationRepository notificationRepository;
-    private UserService userService;
+    private final NotificationRepository notificationRepository;
+    private final UserService userService;
 
     @Transactional(readOnly = true)
     public List<NotificationResponseDto.Info> getMyNotification() {
-        return null;
-    }
+        User currentUser = userService.getCurrentUser();
 
-
-    @Transactional
-    public NotificationResponseDto.Info postNotification() {
-        return null;
+        return NotificationResponseDto.Info.of(notificationRepository.findAllByUser(currentUser));
     }
 }
 
