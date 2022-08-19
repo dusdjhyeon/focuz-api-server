@@ -1,6 +1,5 @@
 package dcom.focuz.api.domain.group.controller;
 
-import com.sun.source.doctree.IndexTree;
 import dcom.focuz.api.domain.group.dto.GroupRequestDto;
 import dcom.focuz.api.domain.group.dto.GroupResponseDto;
 import dcom.focuz.api.domain.group.service.GroupService;
@@ -8,7 +7,6 @@ import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,7 +68,7 @@ public class GroupController {
     }
 
     @ApiOperation("현재 유저가 해당 그룹에서 탈퇴합니다.")
-    @DeleteMapping(value = "/quit/{groupId}")
+    @PostMapping(value = "/quit/{groupId}")
     public ResponseEntity<Void> quitGroup(@ApiParam(value="그룹 ID", required = true) @PathVariable final Integer groupId) {
         groupService.quitGroup(groupId);
 
@@ -93,7 +91,7 @@ public class GroupController {
     }
 
     @ApiOperation("해당 그룹의 멤버 목록을 보여줍니다.")
-    @GetMapping(value = "/{groupId}/list")
+    @GetMapping(value = "/memberList/{groupId}")
     public ResponseEntity<List<UserResponseDto.Simple>> getMemberListForGroup(@ApiParam(value = "그룹 ID", required = true) @PathVariable final Integer groupId) {
         return ResponseEntity.ok(groupService.getMemberListForGroup(groupId));
     }
@@ -129,8 +127,8 @@ public class GroupController {
     }
 
     @ApiOperation("그룹을 이름을 통해 검색합니다.")
-    @GetMapping(value = "/search/{query}")
-    public ResponseEntity<List<GroupResponseDto.Simple>> searchGroup(@PathVariable final String query) {
-        return ResponseEntity.ok(groupService.findByNameContains(query));
+    @GetMapping (value = "/search")
+    public ResponseEntity<List<GroupResponseDto.Simple>> searchGroup(@ApiParam(value = "그룹 이름", required = true) @RequestParam String groupName) {
+        return ResponseEntity.ok(groupService.findByNameContains(groupName));
     }
 }

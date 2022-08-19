@@ -2,6 +2,7 @@ package dcom.focuz.api.domain.group.dto;
 
 import dcom.focuz.api.domain.group.Group;
 import dcom.focuz.api.domain.group.UserGroup;
+import dcom.focuz.api.domain.group.UserGroupPermission;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -53,7 +54,12 @@ public class GroupResponseDto {
                     .id(group.getId())
                     .name(group.getName())
                     .description(group.getDescription())
-                    .users(group.getUsers().stream().map(UserGroup::getUser).map(UserResponseDto.Simple::of).collect(Collectors.toSet()))
+                    .users(group.getUsers()
+                            .stream()
+                            .filter(userGroup -> !(userGroup.getPermission() == UserGroupPermission.NONMEMBER || userGroup.getPermission() == UserGroupPermission.KICKOUTMEMBER))
+                            .map(UserGroup::getUser)
+                            .map(UserResponseDto.Simple::of)
+                            .collect(Collectors.toSet()))
                     .build();
         }
     }
