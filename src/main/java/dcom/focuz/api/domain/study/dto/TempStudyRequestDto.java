@@ -18,7 +18,7 @@ public class TempStudyRequestDto {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Seconds {
+    public static class Time {
         @PositiveOrZero
         @ApiModelProperty(value = "공부 시간")
         private Integer timeSecond;
