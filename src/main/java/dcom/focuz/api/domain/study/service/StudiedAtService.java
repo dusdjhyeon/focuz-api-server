@@ -15,20 +15,18 @@ import dcom.focuz.api.domain.user.repository.UserRepository;
 import dcom.focuz.api.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -39,17 +37,15 @@ public class StudiedAtService {
     private final UserGroupRepository userGroupRepository;
     private final StudiedAtRepository studiedAtRepository;
     private final TempStudyRepository tempStudyRepository;
-    private final RedisTemplate<String, Integer> redisTemplate;//여기있는 데이터 가져와서 studiedAtRepository, userGroupRepository에 갱신
 
     @Scheduled(cron = "0 * * * * *")//매 1분마다 수행
     public void updateDataBase() {
         log.info("Start Update DB");
         // 분당 공부 데이터 가져오기
         // 유저 가져와서 해당 유저가 가진 UserGroup 전체에 시간 추가 하기
-        Iterator<TempStudy> studies = tempStudyRepository.findAll().iterator();
+        Iterable<TempStudy> studies = tempStudyRepository.findAll();
 
-        while (studies.hasNext()) {
-            TempStudy temp = studies.next();
+        for(TempStudy temp: studies){
             Optional<User> user = userRepository.findById(temp.getUserId());
             if(user.isPresent()){
                 List<UserGroup> userGroups = userGroupRepository.findAllByUser(user.get());
@@ -65,15 +61,13 @@ public class StudiedAtService {
             if(studiedAtOptional.isEmpty()){
                 studiedAtRepository.save(
                         StudiedAt.builder()
-                        .user(user.get())
-                        .studyHour(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS))// 시간까지만 가져오게 잘라야 함
-                        .studyTime(temp.getStudyTime())
-                        .build());
+                                .user(user.get())
+                                .studyHour(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS))// 시간까지만 가져오게 잘라야 함
+                                .studyTime(temp.getStudyTime())
+                                .build());
             }
             else {
                 StudiedAt study = studiedAtOptional.get();
-                log.info(study.getStudyTime().toString());
-                log.info(temp.getStudyTime().toString());
                 study.setStudyTime(study.getStudyTime() + temp.getStudyTime());
                 studiedAtRepository.save(study);
             }
@@ -104,21 +98,20 @@ public class StudiedAtService {
 
     // 공부 시간 추가 요청 받으면 Redis에 저장 하는 로직 추가하기.
     @Transactional
-    public Integer updateStudyTime(TempStudyRequestDto.Seconds seconds) {//userid, studyTime,
+    public Integer updateStudyTime(TempStudyRequestDto.Time time) {//userid, studyTime,
         User user = userService.getCurrentUser();
-
         Optional<TempStudy> tempStudyOptional = tempStudyRepository.findByUserId(user.getId());
         if(tempStudyOptional.isEmpty()){
             tempStudyRepository.save(
                     TempStudy.builder()
                             .userId(user.getId())
-                            .studyTime(seconds.getTimeSecond())
+                            .studyTime(time.getTimeSecond())
                             .build());
-            return seconds.getTimeSecond();
+            return time.getTimeSecond();
         }
         else{
             TempStudy study = tempStudyOptional.get();
-            study.setStudyTime(study.getStudyTime()+seconds.getTimeSecond());
+            study.setStudyTime(study.getStudyTime()+time.getTimeSecond());
             tempStudyRepository.save(study);
             return study.getStudyTime();
         }

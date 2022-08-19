@@ -32,14 +32,14 @@ public class StudiedAtController {
     @ApiOperation("해당 범위 내, 공부 한 시간을 반환 합니다.")
     @GetMapping(value = "/search")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<List<StudiedAtResponseDto.Simple>> getStudies(@Valid StudiedAtRequestDto.Search search) {
+    public ResponseEntity<List<StudiedAtResponseDto.Simple>> getStudies(@Valid @RequestBody StudiedAtRequestDto.Search search) {
         return ResponseEntity.ok(studiedAtService.getStudies(search));
     }
 
     @ApiOperation("요청 받은 시간을 레디스에 추가 합니다.")
     @PostMapping(value = "/add")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<Integer> updateStudyTime(@Valid TempStudyRequestDto.Seconds seconds){
-        return ResponseEntity.ok(studiedAtService.updateStudyTime(seconds));
+    public ResponseEntity<Integer> updateStudyTime(@Valid @RequestBody TempStudyRequestDto.Time time){
+        return ResponseEntity.ok(studiedAtService.updateStudyTime(time));
     }
 }
