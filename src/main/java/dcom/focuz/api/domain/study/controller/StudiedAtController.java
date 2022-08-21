@@ -21,14 +21,6 @@ import java.util.List;
 public class StudiedAtController {
     private final StudiedAtService studiedAtService;
 
-    @ApiOperation("현재 공부 한 시간을 추가 합니다.")
-    @PostMapping(value = "")
-    @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public ResponseEntity<Void> studyTime() {
-        studiedAtService.updateDataBase();
-        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
-    }
-
     @ApiOperation("해당 범위 내, 공부 한 시간을 반환 합니다.")
     @GetMapping(value = "/search")
     @ResponseStatus(value = HttpStatus.OK)

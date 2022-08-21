@@ -15,7 +15,7 @@ public class TempStudyTest {
 
     @Test
     void 입력_저장_수정_삭제_테스트() throws Exception {
-        TempStudy tempStudy = new TempStudy(1, 0);
+        TempStudy tempStudy = new TempStudy("asdf", 1, 0);
         tempStudyRepository.save(tempStudy);
 
         Optional<TempStudy> getTempStudy = tempStudyRepository.findById(tempStudy.getId());
@@ -43,7 +43,7 @@ public class TempStudyTest {
 
     @Test
     void 입력만_테스트() throws Exception {
-        TempStudy tempStudy = new TempStudy(1, 0);
+        TempStudy tempStudy = new TempStudy("asdf", 1, 0);
         tempStudyRepository.save(tempStudy);
 
         Optional<TempStudy> getTempStudy = tempStudyRepository.findById(tempStudy.getId());

@@ -45,35 +45,36 @@ public class StudiedAtService {
         // 유저 가져와서 해당 유저가 가진 UserGroup 전체에 시간 추가 하기
         Iterable<TempStudy> studies = tempStudyRepository.findAll();
 
-        for(TempStudy temp: studies){
+        for (TempStudy temp : studies) {
+            if (temp == null) {
+                break;
+            }
             Optional<User> user = userRepository.findById(temp.getUserId());
-            if(user.isPresent()){
+            if (user.isPresent()) {
                 List<UserGroup> userGroups = userGroupRepository.findAllByUser(user.get());
 
-                for(UserGroup userGroup:userGroups){
-                    userGroup.setStudyTime(userGroup.getStudyTime()+temp.getStudyTime());//실제 공부 시간 더해줘야 함
+                for (UserGroup userGroup : userGroups) {
+                    userGroup.setStudyTime(userGroup.getStudyTime() + temp.getStudyTime());//실제 공부 시간 더해줘야 함
                 }
                 userGroupRepository.saveAll(userGroups);
             }
 
             // StudiedAt 가져와서 StudiedAt(해당 시간(시 단위)) 없으면 추가, 있으면 수정하여 save
             Optional<StudiedAt> studiedAtOptional = studiedAtRepository.findByUserAndStudyHour(user.get(), LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-            if(studiedAtOptional.isEmpty()){
+            if (studiedAtOptional.isEmpty()) {
                 studiedAtRepository.save(
                         StudiedAt.builder()
                                 .user(user.get())
                                 .studyHour(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS))// 시간까지만 가져오게 잘라야 함
                                 .studyTime(temp.getStudyTime())
                                 .build());
-            }
-            else {
+            } else {
                 StudiedAt study = studiedAtOptional.get();
                 study.setStudyTime(study.getStudyTime() + temp.getStudyTime());
                 studiedAtRepository.save(study);
             }
 
         }
-
         // 분당 공부 데이터 전체 삭제
         tempStudyRepository.deleteAll();
 
@@ -111,7 +112,7 @@ public class StudiedAtService {
         }
         else{
             TempStudy study = tempStudyOptional.get();
-            study.setStudyTime(study.getStudyTime()+time.getTimeSecond());
+            study.setStudyTime(study.getStudyTime() + time.getTimeSecond());
             tempStudyRepository.save(study);
             return study.getStudyTime();
         }
