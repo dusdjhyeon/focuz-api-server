@@ -45,6 +45,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 Token token = tokenService.generateToken(String.valueOf(user.getId()), Role.USER.getKey());
                 ResponseCookie cookie = ResponseCookie.from("accessToken", token.getToken())
                         .maxAge(7 * 24 * 60 * 60)
+                        .domain(".justkode.kr")
                         .path("/")
                         .httpOnly(true)
                         .build();
@@ -55,6 +56,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 Token token = tokenService.generateToken(String.valueOf(user.getId()), Role.USER.getKey());
                 ResponseCookie cookie = ResponseCookie.from("accessToken", token.getToken())
                         .maxAge(7 * 24 * 60 * 60)
+                        .domain(".justkode.kr")
                         .path("/")
                         .httpOnly(true)
                         .build();

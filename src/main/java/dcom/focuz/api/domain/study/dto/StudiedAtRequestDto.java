@@ -23,12 +23,12 @@ public class StudiedAtRequestDto {
     public static class Search {
         @NotNull @PastOrPresent
         @ApiModelProperty(value = "시작 시간")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime startDate;
 
         @NotNull @PastOrPresent
         @ApiModelProperty(value = "종료 시간")
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
+        @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime endDate;
     }
 }

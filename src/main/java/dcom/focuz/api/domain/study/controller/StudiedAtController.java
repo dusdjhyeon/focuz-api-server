@@ -24,7 +24,7 @@ public class StudiedAtController {
     @ApiOperation("해당 범위 내, 공부 한 시간을 반환 합니다.")
     @GetMapping(value = "/search")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<List<StudiedAtResponseDto.Simple>> getStudies(@Valid @RequestBody StudiedAtRequestDto.Search search) {
+    public ResponseEntity<List<StudiedAtResponseDto.Simple>> getStudies(@Valid @ModelAttribute StudiedAtRequestDto.Search search) {
         return ResponseEntity.ok(studiedAtService.getStudies(search));
     }
 
