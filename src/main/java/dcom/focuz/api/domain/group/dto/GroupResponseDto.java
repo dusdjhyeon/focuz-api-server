@@ -47,7 +47,7 @@ public class GroupResponseDto {
         private Integer id;
         private String name;
         private String description;
-        private Set<UserResponseDto.Simple> users;
+        private Set<UserResponseDto.Group> users;
 
         public static Info of(Group group) {
             return Info.builder()
@@ -57,8 +57,7 @@ public class GroupResponseDto {
                     .users(group.getUsers()
                             .stream()
                             .filter(userGroup -> !(userGroup.getPermission() == UserGroupPermission.NONMEMBER || userGroup.getPermission() == UserGroupPermission.KICKOUTMEMBER))
-                            .map(UserGroup::getUser)
-                            .map(UserResponseDto.Simple::of)
+                            .map(UserResponseDto.Group::of)
                             .collect(Collectors.toSet()))
                     .build();
         }

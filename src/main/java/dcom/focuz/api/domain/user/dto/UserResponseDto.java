@@ -41,6 +41,37 @@ public class UserResponseDto {
     @Getter @Setter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class Group {
+        private Integer id;
+        private String name;
+        private String nickname;
+        private String motto;
+        private String profileImage;
+        private Long studyTime;
+
+        public static Group of(UserGroup userGroup) {
+            User user = userGroup.getUser();
+
+            return Group.builder()
+                    .id(user.getId())
+                    .name(user.getName())
+                    .nickname(user.getNickname())
+                    .motto(user.getMotto())
+                    .profileImage(user.getProfileImage())
+                    .studyTime(userGroup.getStudyTime())
+                    .build();
+        }
+
+        public static List<Group> of(List<UserGroup> users) {
+            return users.stream().map(Group::of).collect(Collectors.toList());
+        }
+    }
+
+
+    @Builder
+    @Getter @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Profile {
         private Integer id;
         private String email;
