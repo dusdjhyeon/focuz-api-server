@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Api(tags = {"User Controller"})
 @RestController
@@ -27,7 +27,7 @@ public class UserController {
     @ApiOperation("전체 유저 리스트를 뽑아 냅니다.")
     @GetMapping(value = "/list")
     @ResponseStatus(value = HttpStatus.OK)
-    public ResponseEntity<List<UserResponseDto.Simple>> getAllUser(@PageableDefault(size=10,sort="id",direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<Page<UserResponseDto.Simple>> getAllUser(@PageableDefault(size=10,sort="id",direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(userService.getAllUser(pageable));
     }
 
