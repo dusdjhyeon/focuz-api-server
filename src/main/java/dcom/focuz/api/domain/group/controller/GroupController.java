@@ -8,6 +8,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -116,14 +120,14 @@ public class GroupController {
 
     @ApiOperation("그룹 전체 목록을 보여줍니다.")
     @GetMapping(value = "/list")
-    public ResponseEntity<List<GroupResponseDto.Simple>> getAllGroup() {
-        return ResponseEntity.ok(groupService.getAllGroup());
+    public ResponseEntity<Page<GroupResponseDto.Simple>> getAllGroup(@PageableDefault(size=8, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(groupService.getAllGroup(pageable));
     }
 
     @ApiOperation("해당 유저가 속해 있는 모든 그룹 목록을 보여줍니다.")
     @GetMapping(value = "/list/{userId}")
-    public ResponseEntity<List<GroupResponseDto.Simple>> getAllMyGroups(@ApiParam(value = "유저 ID", required = true) @PathVariable final Integer userId) {
-        return ResponseEntity.ok(groupService.getAllMyGroups(userId));
+    public ResponseEntity<Page<GroupResponseDto.Simple>> getAllMyGroups(@ApiParam(value = "유저 ID", required = true) @PathVariable final Integer userId, @PageableDefault(size=3)Pageable pageable) {
+        return ResponseEntity.ok(groupService.getAllMyGroups(userId, pageable));
     }
 
     @ApiOperation("그룹을 이름을 통해 검색합니다.")
