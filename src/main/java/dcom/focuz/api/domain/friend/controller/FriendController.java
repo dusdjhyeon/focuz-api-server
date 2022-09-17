@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -12,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @Api(tags = {"Friend Controller"})
 @RestController
@@ -56,7 +56,7 @@ public class FriendController {
     @ApiOperation("현재 유저에게 친구요청을 한 유저 리스트를 반환합니다.")
     @GetMapping(value="/request/list")
     @ResponseStatus(value=HttpStatus.OK)
-    public ResponseEntity<List<UserResponseDto.Simple>> getFriendRequestList(@PageableDefault(size = 5) Pageable pageable){
+    public ResponseEntity<Page<UserResponseDto.Simple>> getFriendRequestList(@PageableDefault(size = 5) Pageable pageable){
         return ResponseEntity.ok(friendservice.getFriendRequestList(pageable));
     }
 
@@ -70,7 +70,7 @@ public class FriendController {
     @ApiOperation("현재 유저의 친구 목록을 반환 합니다.")
     @GetMapping(value = "/list")
     @ResponseStatus(value=HttpStatus.OK)
-    public ResponseEntity<List<UserResponseDto.Simple>> getFriendList(@PageableDefault(size = 5, sort="user.name",direction = Sort.Direction.ASC) Pageable pageable){
+    public ResponseEntity<Page<UserResponseDto.Simple>> getFriendList(@PageableDefault(size = 5, sort="user.name",direction = Sort.Direction.ASC) Pageable pageable){
         return ResponseEntity.ok(friendservice.getFriendList(pageable));
     }
 
@@ -92,7 +92,7 @@ public class FriendController {
     @ApiOperation("현재 유저가 차단한 친구들의 목록을 반환 합니다.")
     @GetMapping(value = "/blocked/list")
     @ResponseStatus(value=HttpStatus.OK)
-    public ResponseEntity<List<UserResponseDto.Simple>> getBlockedFriendList(@PageableDefault(size = 5) Pageable pageable){
+    public ResponseEntity<Page<UserResponseDto.Simple>> getBlockedFriendList(@PageableDefault(size = 5) Pageable pageable){
         return ResponseEntity.ok(friendservice.getBlockedFriendList(pageable));
     }
 
