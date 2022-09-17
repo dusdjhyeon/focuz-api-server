@@ -4,6 +4,8 @@ import dcom.focuz.api.domain.group.Group;
 import dcom.focuz.api.domain.group.UserGroup;
 import dcom.focuz.api.domain.group.UserGroupPermission;
 import dcom.focuz.api.domain.user.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -24,4 +26,6 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
 
     Optional<UserGroup> findByUserAndGroup(User user, Group groupObj);
     List<UserGroup> findAllByUser(User user);
+
+    Page<UserGroup> findAllByUser(User user, Pageable pageable);
 }
