@@ -11,6 +11,7 @@ import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import dcom.focuz.api.domain.user.repository.UserRepository;
 import dcom.focuz.api.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +78,7 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponseDto.Simple> getFriendRequestList() {
+    public List<UserResponseDto.Simple> getFriendRequestList(Pageable pageable) {
         User currentUser = userService.getCurrentUser();
 
         if (currentUser.getRole() != Role.USER) {
@@ -87,7 +88,7 @@ public class FriendService {
         }
 
         return UserResponseDto.Simple.of(
-                friendRepository.findAllByStateAndTargetUser(FriendState.REQUEST, currentUser)
+                friendRepository.findAllByStateAndTargetUser(FriendState.REQUEST, currentUser, pageable)
                         .stream()
                         .map(Friend::getUser)
                         .collect(Collectors.toList())
@@ -138,7 +139,7 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponseDto.Simple> getFriendList() {
+    public List<UserResponseDto.Simple> getFriendList(Pageable pageable) {
         User currentUser = userService.getCurrentUser();
 
         if (currentUser.getRole() != Role.USER) {
@@ -148,7 +149,7 @@ public class FriendService {
         }
 
         return UserResponseDto.Simple.of(
-                friendRepository.findAllByStateAndTargetUser(FriendState.FRIEND, currentUser)
+                friendRepository.findAllByStateAndTargetUser(FriendState.FRIEND, currentUser, pageable)
                         .stream()
                         .map(Friend::getUser)
                         .collect(Collectors.toList())
@@ -240,7 +241,7 @@ public class FriendService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserResponseDto.Simple> getBlockedFriendList(){
+    public List<UserResponseDto.Simple> getBlockedFriendList(Pageable pageable){
         User currentUser = userService.getCurrentUser();
 
         if (currentUser.getRole() != Role.USER) {
@@ -250,7 +251,7 @@ public class FriendService {
         }
 
         return UserResponseDto.Simple.of(
-                friendRepository.findAllByStateAndUser(FriendState.BLOCKED, currentUser)
+                friendRepository.findAllByStateAndUser(FriendState.BLOCKED, currentUser, pageable)
                         .stream()
                         .map(Friend::getTargetUser)
                         .collect(Collectors.toList())
