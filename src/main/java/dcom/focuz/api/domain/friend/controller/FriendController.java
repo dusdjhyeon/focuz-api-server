@@ -5,11 +5,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @Api(tags = {"Friend Controller"})
 @RestController
@@ -53,8 +56,8 @@ public class FriendController {
     @ApiOperation("현재 유저에게 친구요청을 한 유저 리스트를 반환합니다.")
     @GetMapping(value="/request/list")
     @ResponseStatus(value=HttpStatus.OK)
-    public ResponseEntity<List<UserResponseDto.Simple>> getFriendRequestList(){
-        return ResponseEntity.ok(friendservice.getFriendRequestList());
+    public ResponseEntity<Page<UserResponseDto.Simple>> getFriendRequestList(@PageableDefault(size = 5) Pageable pageable){
+        return ResponseEntity.ok(friendservice.getFriendRequestList(pageable));
     }
 
     @ApiOperation("현재 유저에게 온 친구 요청을 수락합니다.")
@@ -67,8 +70,8 @@ public class FriendController {
     @ApiOperation("현재 유저의 친구 목록을 반환 합니다.")
     @GetMapping(value = "/list")
     @ResponseStatus(value=HttpStatus.OK)
-    public ResponseEntity<List<UserResponseDto.Simple>> getFriendList(){
-        return ResponseEntity.ok(friendservice.getFriendList());
+    public ResponseEntity<Page<UserResponseDto.Simple>> getFriendList(@PageableDefault(size = 5, sort="user.name",direction = Sort.Direction.ASC) Pageable pageable){
+        return ResponseEntity.ok(friendservice.getFriendList(pageable));
     }
 
     @ApiOperation("타겟 유저를 현재 유저의 친구 목록에서 삭제합니다.")
@@ -89,8 +92,8 @@ public class FriendController {
     @ApiOperation("현재 유저가 차단한 친구들의 목록을 반환 합니다.")
     @GetMapping(value = "/blocked/list")
     @ResponseStatus(value=HttpStatus.OK)
-    public ResponseEntity<List<UserResponseDto.Simple>> getBlockedFriendList(){
-        return ResponseEntity.ok(friendservice.getBlockedFriendList());
+    public ResponseEntity<Page<UserResponseDto.Simple>> getBlockedFriendList(@PageableDefault(size = 5) Pageable pageable){
+        return ResponseEntity.ok(friendservice.getBlockedFriendList(pageable));
     }
 
     @ApiOperation("타겟유저에게 한 친구요청을 취소합니다.")

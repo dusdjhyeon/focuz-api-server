@@ -5,9 +5,9 @@ import dcom.focuz.api.domain.user.User;
 import dcom.focuz.api.domain.user.dto.UserRequestDto;
 import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import dcom.focuz.api.domain.user.repository.UserRepository;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +22,8 @@ public class UserService {
     protected final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<UserResponseDto.Simple> getAllUser() {
-        return UserResponseDto.Simple.of(userRepository.findAll());
+    public Page<UserResponseDto.Simple> getAllUser(Pageable pageable) {
+        return userRepository.findAll(pageable).map(UserResponseDto.Simple::of);
     }
 
     @Transactional(readOnly = true)
