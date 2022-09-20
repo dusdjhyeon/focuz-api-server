@@ -80,8 +80,6 @@ public class UserResponseDto {
         private String profileImage;
         private Role role;
         private List<GroupResponseDto.Info> groups;
-        private Long studyTime;
-        static UserGroup userGroup;
 
         public static Profile of(User user) {
             return Profile.builder()
@@ -92,7 +90,6 @@ public class UserResponseDto {
                     .profileImage(user.getProfileImage())
                     .role(user.getRole())
                     .groups(user.getGroups().stream().map(UserGroup::getGroup).map(GroupResponseDto.Info::of).collect(Collectors.toList()))
-                    .studyTime(userGroup.getStudyTime())
                     .build();
         }
     }
