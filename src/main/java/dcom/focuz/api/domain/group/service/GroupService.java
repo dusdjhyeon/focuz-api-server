@@ -15,6 +15,8 @@ import dcom.focuz.api.domain.user.dto.UserResponseDto;
 import dcom.focuz.api.domain.user.repository.UserRepository;
 import dcom.focuz.api.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -387,20 +389,19 @@ public class GroupService {
 
     // 그룹 전체 리스트
     @Transactional(readOnly = true)
-    public List<GroupResponseDto.Simple> getAllGroup() {
+    public Page<GroupResponseDto.Simple> getAllGroup(Pageable pageable) {
 
-        return GroupResponseDto.Simple.of(groupRepository.findAll());
+        return groupRepository.findAll(pageable).map(GroupResponseDto.Simple::of);
     }
 
     // 해당 유저의 그룹 리스트
     @Transactional(readOnly = true)
-    public List<GroupResponseDto.Simple> getAllMyGroups(Integer userId) {
+    public Page<GroupResponseDto.Simple> getAllMyGroups(Integer userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "해당하는 유저가 존재하지 않습니다."
         ));
 
-        return userGroupRepository.findAllByUser(user)
-                .stream().map(UserGroup::getGroup).map(GroupResponseDto.Simple::of).collect(Collectors.toList());
+        return userGroupRepository.findAllByUser(user, pageable).map(UserGroup::getGroup).map(GroupResponseDto.Simple::of);
     }
 
     // 그룹 이름으로 검색

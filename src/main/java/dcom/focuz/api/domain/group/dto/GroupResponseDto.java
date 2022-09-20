@@ -32,10 +32,6 @@ public class GroupResponseDto {
                     .description(group.getDescription())
                     .build();
         }
-
-        public static List<Simple> of(List<Group> groups) {
-            return groups.stream().map(Simple::of).collect(Collectors.toList());
-        }
     }
 
     @ApiModel(value = "그룹 프로필 세부 정보")

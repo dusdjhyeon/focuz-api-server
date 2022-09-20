@@ -1,6 +1,8 @@
 package dcom.focuz.api.domain.group.repository;
 
 import dcom.focuz.api.domain.group.Group;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
